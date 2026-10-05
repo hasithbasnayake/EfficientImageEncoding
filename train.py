@@ -2,6 +2,8 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
+from torch.utils.data.dataset import _T_co
+
 '''
 What's the structure of Project Dynapse going to be?
 
@@ -148,6 +150,27 @@ def latency(training_images, num_steps=255):
 
     return norm_latency_images
 
+class LatencyDataset(Dataset):
+
+    def __init__(self, latency_images, training_images, training_labels, num_steps=255):
+        self.latency_images = latency_images
+        self.training_images = training_images
+        self.training_labels = training_labels
+        self.num_steps = num_steps
+
+    def __len__(self):
+        return self.latency_images.shape[0]
+
+    def __getitem__(self, index):
+        latency_image = self.latency_images[index]
+
+        steps = torch.arange(self.num_steps)
+        spikes = steps[:, None] == latency_image[None,:]
+
+        return_tuple = (spikes.float(), self.training_images[index], self.training_labels[index])
+        return return_tuple
+
+
 if __name__ == '__main__':
     training_set = torchvision.datasets.FashionMNIST(root="assets/data/", train=True, transform=transforms.ToTensor(), download=True)
 
@@ -155,11 +178,15 @@ if __name__ == '__main__':
     training_labels = training_set.targets
 
     norm_latency_images = latency(trainingDoG_test_tensor)
-    print(norm_latency_images.size())
-    print(norm_latency_images)
-
+    # print(norm_latency_images.size())
+    # print(norm_latency_images)
+    #
     norm_latency_images = norm_latency_images.flatten(start_dim=1)
-    print(norm_latency_images.size())
+    # print(norm_latency_images.size())
+
+    spike_set = LatencyDataset(norm_latency_images, training_images, training_labels, num_steps=255)
+
+    print(spike_set[0][0].size())
 
 
     # training_images = training_set.data
