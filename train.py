@@ -1,3 +1,6 @@
+import torchvision
+import torchvision.transforms as transforms
+from torch.utils.data import Dataset
 '''
 What's the structure of Project Dynapse going to be?
 
@@ -34,5 +37,34 @@ A user should be prompted to either load a model from the saved_models by provid
     # Take all the train images and apply DoG filtering
     # Take all the DoG train images and convert them into spikes
 
-if __name__ == '__main__':
-    pass
+class SNNDataset(Dataset):
+    '''
+    Class that provides helper methods and wraps the SNN-formatted data.
+    '''
+
+    def __init__(self, raw_img, data_mask, transform=None):
+        self.raw_img = raw_img
+        self.data_mask = data_mask
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.raw_img)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        image = self.raw_img[idx]
+        mask = self.data_mask[idx]
+
+        sample = {'image': image, 'mask': mask}
+
+        if self.transform:
+            sample = self.transform(sample)
+
+        return sample
+
+if __name__ == '__train__':
+    training_set = torchvision.datasets.FashionMNIST(root="assets/data/", train=True, transform=transforms.ToTensor(), download=True)
+    print(len(training_set))
+    # train-images-idx3-ubyte, 60,000 training images, 26 Mbytes
