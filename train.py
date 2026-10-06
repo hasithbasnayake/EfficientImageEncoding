@@ -170,6 +170,14 @@ class LatencyDataset(Dataset):
         return_tuple = (spikes.float(), self.training_images[index], self.training_labels[index])
         return return_tuple
 
+    def plot(self, index):
+        spikes, image, label = self[index]
+        return f"Unfinished plotting method"
+        # Need to finish implementing
+
+    def __str__(self):
+        return f"Spike dataset of {len(self)}"
+
 
 if __name__ == '__main__':
     training_set = torchvision.datasets.FashionMNIST(root="assets/data/", train=True, transform=transforms.ToTensor(), download=True)
@@ -180,22 +188,14 @@ if __name__ == '__main__':
     norm_latency_images = latency(trainingDoG_test_tensor)
     # print(norm_latency_images.size())
     # print(norm_latency_images)
+
     #
     norm_latency_images = norm_latency_images.flatten(start_dim=1)
     # print(norm_latency_images.size())
 
+
+
     spike_set = LatencyDataset(norm_latency_images, training_images, training_labels, num_steps=255)
-
-    print(spike_set[0][0].size())
-
-
-    # training_images = training_set.data
-    # training_labels = training_set.targets
-    #
-    # print(type(training_images))
-    # print(training_images.unsqueeze(1).size())
-    # print(type(training_labels))
-    # print(training_labels.size())
-    # train-images-idx3-ubyte, 60,000 training images, 26 Mbytes
-
-    # 4) Implement class to take in the latency images
+    # print(spike_set[0][0].size())
+    print(spike_set[0][0].sum(dim=0))
+    print(spike_set)
