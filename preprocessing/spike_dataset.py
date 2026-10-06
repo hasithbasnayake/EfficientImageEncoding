@@ -21,6 +21,7 @@ class spike_dataset(Dataset):
         the num_steps parameter used for latency().
     images : torch.Tensor
         An image tensor of the shape [N, C, H, W] with values representing pixel intensities.
+
         NOTE: Should be the original dataset passed into latency(), returned as is, used as reconstruction targets.
     labels : torch.Tensor
         Int tensor of shape [N] holding each image's class label.
@@ -28,6 +29,12 @@ class spike_dataset(Dataset):
         Length of each spike train. As stated above, must equal the num_steps used in
         latency(), or spikes will be dropped.
 
+    __getitem__
+    ----------
+    Indexing returns a tuple (spikes, image, label):
+        spikes : float tensor of shape [S, F]
+        image  : the corresponding entry of `images`
+        label  : the corresponding entry of `labels`
     """
 
     def __init__(self, latency_images: torch.Tensor, images: torch.Tensor, labels: torch.Tensor, num_steps: int = 255) -> None:
