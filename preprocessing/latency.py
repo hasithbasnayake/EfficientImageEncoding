@@ -1,14 +1,16 @@
-def latency(images: torch.Tensor, num_steps: int = 255):
+import torch
+
+def latency(images: torch.Tensor, num_steps: int = 255) -> torch.Tensor:
     """
     Convert pixel intensities to spike latencies using a 1 / x encoding.
 
     Parameters
     ----------
-    images : Torch.tensor
+    images : torch.tensor
         An image tensor of the shape [N, C, H, W] where N is the number of images,
         C is the number of channels, H is the height, and W is the width.
     num_steps : int
-        The number of timesteps the spike latencies should be normalized across
+        The number of timesteps the spike latencies are normalized across.
 
     Returns
     ----------
