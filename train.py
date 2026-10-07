@@ -1,8 +1,6 @@
-import torch
 import torchvision
 import torchvision.transforms as transforms
-from torch.utils.data import Dataset
-from torch.utils.data.dataset import _T_co
+from torch.utils.data import DataLoader
 
 from preprocessing.latency import latency
 from preprocessing.spike_dataset import SpikeDataset
@@ -17,5 +15,4 @@ if __name__ == '__main__':
     latency_images = latency_images.flatten(start_dim=1)
 
     spike_set = SpikeDataset(latency_images=latency_images, images=training_images, labels=training_labels, num_steps=255)
-    print(spike_set)
-    print(spike_set[0][0].size())
+    loader = DataLoader(spike_set, batch_size=1, shuffle=True)
