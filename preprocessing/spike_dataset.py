@@ -1,5 +1,7 @@
 import torch
 from torch.utils.data import Dataset
+import matplotlib.pyplot as plt
+import numpy as np
 
 class SpikeDataset(Dataset):
     """
@@ -59,4 +61,37 @@ class SpikeDataset(Dataset):
         return f"Spike dataset containing ({len(self)}) spike-encoded images in the shape [{self.num_steps}, {self.latency_images.size(dim=1)}]"
 
     def plot(self, index=None):
-        return "Unimplemented plot method"
+        if index is None:
+            index = 0
+
+        spikes, image, label = self[index]
+        counts = spikes.sum(dim=1)
+        x, y = spikes.size()
+
+        print(f"Shape of spikes: {spikes.shape}")
+        print(f"Shape of image: {image.size()}")
+        print(f"Label: {label}")
+
+        # NOTE: Make sure that the image is the form [C, H, W]
+        num_channels = image.size(dim=0)
+
+        fig, axs = plt.subplots(1, (num_channels + 1), figsize=(4 * (num_channels + 1), 4), layout='constrained')
+        axs[0].plot(counts)
+        axs[0].set_title('Spikes')
+        axs[0].set_xlabel('Timesteps')
+        axs[0].set_ylabel('Count')
+        axs[0].set_xlim(0, x)
+        axs[0].set_ylim(0, y)
+
+        for channel in range(num_channels):
+            channel_image = image[channel]
+            ax = axs[channel + 1]
+            ax.imshow(channel_image, cmap="gray")
+            ax.set_title(f'Image label: {label}')
+            ax.set_xlabel('Pixels')
+            ax.set_ylabel('Pixels')
+
+        plt.show()
+
+
+
