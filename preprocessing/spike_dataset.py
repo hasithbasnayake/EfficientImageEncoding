@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 
-class spike_dataset(Dataset):
+class SpikeDataset(Dataset):
     """
     A subclass of PyTorch's dataset. Serves latency-encoded images as spike trains.
 
@@ -58,5 +58,5 @@ class spike_dataset(Dataset):
     def __str__(self):
         return f"Spike dataset containing ({len(self)}) spike-encoded images in the shape [{self.num_steps}, {self.latency_images.size(dim=1)}]"
 
-    def plot(self, index):
+    def plot(self, index=None):
         return "Unimplemented plot method"
