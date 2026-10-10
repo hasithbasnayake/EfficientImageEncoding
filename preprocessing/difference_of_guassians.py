@@ -2,22 +2,38 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-# def difference_of_gaussians(dim, ctr, sur):
-#
-#     kernel = gen_gaussian_kernel(dim, sur)
-#     lgn_field_on, lgn_field_off = gen_receptive_fields(kernel)
-#
-#     # Convolve with dataset here
-#
-#     return None
-#
-# def gen_receptive_fields(kernel):
-#     pass
+def difference_of_gaussians(dataset, shape, ctr, sur):
+    dataset = dataset.float() / 255
+
+    on_kernel, off_kernel = [kernel.unsqueeze(0).unsqueeze(1) for kernel in gen_lgn_receptive_fields(shape, ctr, sur)]
+
+    on_dataset = torch.conv2d(dataset, on_kernel, padding='same')
+    off_dataset = torch.conv2d(dataset, off_kernel, padding='same')
+
+    on_dataset = torch.clamp(on_dataset, 0, 1)
+    off_dataset = torch.clamp(off_dataset, 0, 1)
+
+    return torch.cat([on_dataset, off_dataset], dim=1)
+
+def gen_lgn_receptive_fields(shape, ctr, sur):
+    ctr_kernel = gen_gaussian_kernel(shape, ctr)
+    sur_kernel = gen_gaussian_kernel(shape, sur)
+
+    on_kernel = ctr_kernel - sur_kernel
+    off_kernel = -ctr_kernel + sur_kernel
+
+    on_kernel = on_kernel - torch.mean(on_kernel)
+    off_kernel = off_kernel - torch.mean(off_kernel)
+
+    on_kernel = on_kernel / (torch.sum(torch.abs(on_kernel)) / 2 )
+    off_kernel = off_kernel / (torch.sum(torch.abs(off_kernel)) / 2 )
+
+    return on_kernel, off_kernel
 
 def gen_gaussian_kernel(shape, sigma):
     h, w = shape
-    row_dist = torch.linspace(-((h - 1.) / 2.), ((h - 1.) / 2.), h, dtype=torch.float64)
-    col_dist = torch.linspace(-((w - 1.) / 2.), ((w - 1.) / 2.), w, dtype=torch.float64)
+    row_dist = torch.linspace(-((h - 1.) / 2.), ((h - 1.) / 2.), h, dtype=torch.float32)
+    col_dist = torch.linspace(-((w - 1.) / 2.), ((w - 1.) / 2.), w, dtype=torch.float32)
 
     dist_matrix = torch.square(row_dist[:, None]) + torch.square(col_dist[None, :])
 
