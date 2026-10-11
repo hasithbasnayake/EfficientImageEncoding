@@ -1,8 +1,6 @@
 import torch
-import numpy as np
-import matplotlib.pyplot as plt
 
-def difference_of_gaussians(dataset, shape, ctr, sur):
+def difference_of_gaussians(dataset, shape, ctr, sur, threshold=1e-6):
     dataset = dataset.float() / 255
 
     on_kernel, off_kernel = [kernel.unsqueeze(0).unsqueeze(1) for kernel in gen_lgn_receptive_fields(shape, ctr, sur)]
@@ -13,7 +11,10 @@ def difference_of_gaussians(dataset, shape, ctr, sur):
     on_dataset = torch.clamp(on_dataset, 0, 1)
     off_dataset = torch.clamp(off_dataset, 0, 1)
 
-    return torch.cat([on_dataset, off_dataset], dim=1)
+    lgn_dataset = torch.cat([on_dataset, off_dataset], dim=1)
+    lgn_dataset[lgn_dataset < threshold] = 0
+
+    return lgn_dataset
 
 def gen_lgn_receptive_fields(shape, ctr, sur):
     ctr_kernel = gen_gaussian_kernel(shape, ctr)
