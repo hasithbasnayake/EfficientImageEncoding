@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 
 from preprocessing.latency import latency
 from preprocessing.spike_dataset import SpikeDataset
-from preprocessing.difference_of_guassians import gen_lgn_receptive_fields, difference_of_gaussians
+from preprocessing.difference_of_guassians import lgn_preprocessing
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     training_images = training_set.data.unsqueeze(1)
     training_labels = training_set.targets
-    training_images = difference_of_gaussians(training_images, shape, ctr, sur, threshold=1/255)
+    training_images = lgn_preprocessing(training_images, shape, ctr, sur, threshold=1/255)
 
     latency_images = latency(training_images)
     latency_images = latency_images.flatten(start_dim=1)
