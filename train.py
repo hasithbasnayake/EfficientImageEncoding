@@ -5,7 +5,9 @@ from torch.utils.data import DataLoader
 from preprocessing.latency import latency
 from preprocessing.spike_dataset import SpikeDataset
 from preprocessing.difference_of_guassians import lgn_preprocessing
+
 from model.model import Net
+from model.learning import update_weights, wta
 
 import numpy as np
 import snntorch.spikeplot as splt
@@ -26,7 +28,7 @@ if __name__ == '__main__':
 
     model = Net(
         num_input=1568,
-        num_output=10,
+        num_output=100,
         beta=.9, #.9
         threshold=82, #20
         reset_mechanism="zero",
@@ -51,15 +53,18 @@ if __name__ == '__main__':
         with torch.no_grad():
             spk_rec, mem_rec = model.forward(spikes.squeeze())
 
-        # fig, ax = plt.subplots(figsize=(10,5))
-        # splt.raster(spk_rec, ax, s=5, color="black", marker="|")
-        # ax.set_xlim(0, spk_rec.shape[0])
-        # ax.set_ylim(-0.5, spk_rec.shape[1] - 0.5)
-        # ax.set_xlabel("Timestep")
-        # ax.set_ylabel("Neuron")
-        # ax.set_title("Output spike raster")
-        # plt.show()
-        #
+        wta(spk_rec, 100)
+
+
+        fig, ax = plt.subplots(figsize=(10,5))
+        splt.raster(spk_rec, ax, s=5, color="black", marker="|")
+        ax.set_xlim(0, spk_rec.shape[0])
+        ax.set_ylim(-0.5, spk_rec.shape[1] - 0.5)
+        ax.set_xlabel("Timestep")
+        ax.set_ylabel("Neuron")
+        ax.set_title("Output spike raster")
+        plt.show()
+
         # fig, ax = plt.subplots(figsize=(10, 5))
         # ax.plot(mem_rec, lw=0.5, alpha=0.3, color="gray")
         # ax.set_xlim(0, 20)  # zoom to where the winner is decided; remove to see all 255 steps
@@ -68,10 +73,3 @@ if __name__ == '__main__':
         # ax.set_title("Membrane potential traces")
         # plt.show()
         # plt.show()
-
-        print(type(spk_rec))
-        print(spk_rec.size())
-        print(spk_rec)
-        print(type(mem_rec))
-        print(mem_rec.size())
-        print(mem_rec)
