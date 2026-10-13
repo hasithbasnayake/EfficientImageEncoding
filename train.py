@@ -25,6 +25,7 @@ if __name__ == '__main__':
     tau = 200
     mu_plus = 0.65
     mu_minus = 0.05
+    params = (A_plus, A_minus, tau, mu_plus, mu_minus)
 
     model = Net(
         num_input=1568,
@@ -47,23 +48,29 @@ if __name__ == '__main__':
     spike_set = SpikeDataset(latency_images=latency_images, images=training_images, labels=training_labels, num_steps=255)
     loader = DataLoader(spike_set, batch_size=1, shuffle=True)
 
-    for i in range(1):
+    W0 = model.fc1.weight.detach().clone()
+
+    for i in range(60000):
+        print(f"Image: {i}")
         spikes, images, label = spike_set[i]
 
         with torch.no_grad():
             spk_rec, mem_rec = model.forward(spikes.squeeze())
 
-        wta(spk_rec, 100)
+        weight_update = update_weights(model.fc1.weight, spikes, spk_rec, 1, True, params)
 
+        with torch.no_grad():
+            model.fc1.weight += weight_update
+            model.fc1.weight.clamp_(0, 1)
 
-        fig, ax = plt.subplots(figsize=(10,5))
-        splt.raster(spk_rec, ax, s=5, color="black", marker="|")
-        ax.set_xlim(0, spk_rec.shape[0])
-        ax.set_ylim(-0.5, spk_rec.shape[1] - 0.5)
-        ax.set_xlabel("Timestep")
-        ax.set_ylabel("Neuron")
-        ax.set_title("Output spike raster")
-        plt.show()
+        # fig, ax = plt.subplots(figsize=(10,5))
+        # splt.raster(spk_rec, ax, s=5, color="black", marker="|")
+        # ax.set_xlim(0, spk_rec.shape[0])
+        # ax.set_ylim(-0.5, spk_rec.shape[1] - 0.5)
+        # ax.set_xlabel("Timestep")
+        # ax.set_ylabel("Neuron")
+        # ax.set_title("Output spike raster")
+        # plt.show()
 
         # fig, ax = plt.subplots(figsize=(10, 5))
         # ax.plot(mem_rec, lw=0.5, alpha=0.3, color="gray")
@@ -73,3 +80,16 @@ if __name__ == '__main__':
         # ax.set_title("Membrane potential traces")
         # plt.show()
         # plt.show()
+
+    W = model.fc1.weight.detach().cpu()
+    W = W - W0
+    W = W.reshape(100, 2, 28, 28)
+
+    rf = W[:, 0] - W[:, 1]
+
+    fig, axes = plt.subplots(10, 10, figsize=(10, 10))
+    for i, ax in enumerate(axes.flat):
+        ax.imshow(rf[i], cmap="bwr")
+        ax.axis("off")
+    plt.tight_layout()
+    plt.show()
