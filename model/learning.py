@@ -1,32 +1,24 @@
-# Define wta functions
 import torch
 import random
 
-def update_weights(model_weights, input_spikes, spk_rec, wta_num, params):
+def update_weights(model_weights, input_spikes, spk_rec, wta_num, strict, params):
 
     A_plus, A_minus, tau, mu_plus, mu_minus = params
 
-    #spk_rec is 255, 100
+    output_spk = wta(spk_rec, wta_num, strict)
 
-    num_to_update, rnd_selection, first_idx = wta(spk_rec, wta_num)
-    # so we need to collect the spike trains of the chosen and save it to out spike
-    out_spike = spk_rec[:, num_to_update] # problem is this could be multiple
-    # then we get the first index of this spike train, where this neuron spiked first
-    # if there's actually an index of first spike (that's the if statement), get that index
-    # then set all the other spikes after it equal to 0 in spk_rec
-    # grab the weight matrix for the spiked neuron
+    t = torch.arange(255)
+    dt = (t[:, None] - t[None, :]).float()
 
-    # then grab the spikes of the input neurons
-    # and the times in which they spiked, not sure what format these are in
+    w_plus = torch.where(dt > 0, A_plus * torch.exp(-dt / tau), 0.0)
+    w_minus = torch.where(dt <= 0, A_minus * torch.exp(-dt.abs() / tau), 0.0)
 
-    # get the spikes of the output neuron again? not sure if I already got them
+    ltp = post.T @ w_plus @ spk_rec
+    ltd = post.T @ w_minus @ spk_rec
 
-    # and then update the weights using masking
+    weight_update = ltp * (1 - model_weights)**mu_plus * model_weights**mu_minus
 
-    # need to scale across the number of selections and provide weight updates
-    # for each of those
-
-    # output of this function is either 1 neuron or multiple neurons
+    return weight_update
 
 
 def wta(spk_rec, wta_num, strict=False):
@@ -47,5 +39,7 @@ def wta(spk_rec, wta_num, strict=False):
 
     if strict:
         output[first_spk_timestep + 1:, :] = 0
+
+    print(output.shape)
 
     return output
