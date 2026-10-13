@@ -29,28 +29,23 @@ def update_weights(model_weights, input_spikes, spk_rec, wta_num, params):
     # output of this function is either 1 neuron or multiple neurons
 
 
-def wta(spk_rec, wta_num):
+def wta(spk_rec, wta_num, strict=False):
 
-    # print(spk_rec)
-    # print(spk_rec.shape)
-    # print(spk_rec.any(dim=1))
-    # print(spk_rec.any(dim=1).sum().item())
+    if spk_rec.any(dim=1).nonzero().numel() == 0:
+        return torch.zeros_like(spk_rec)
 
-    first_idx = torch.argmax(spk_rec.any(dim=1).int())
-    # Need to get the edge case in which there's no spikes, we can do spk_rec.any to catch for that
-    # Need to figure out if nothing spikes, when we randomly get 0, pass in an empty tensor of 255, 100 to test
-    col_first_spk = spk_rec[first_idx, :]
-    idx_of_neurons = (col_first_spk==1).nonzero().flatten()
+    first_spk_timestep = torch.argmax(spk_rec.any(dim=1).int())
+    col_first_spk_timestep = spk_rec[first_spk_timestep, :]
+    idxs_of_first_spk_neurons = (col_first_spk_timestep==1).nonzero().flatten()
 
-    num_to_select = min(wta_num, len(idx_of_neurons))
-    rnd_selection = random.sample(list(idx_of_neurons), num_to_select)
+    wta_num = min(wta_num, len(idxs_of_first_spk_neurons))
 
-    print(col_first_spk.shape)
-    print(col_first_spk)
-    print(int(first_idx))
-    print(idx_of_neurons)
+    rnd_selection = random.sample(list(idxs_of_first_spk_neurons), wta_num)
 
-    print(rnd_selection)
+    output = torch.zeros_like(spk_rec)
+    output[:, rnd_selection] = spk_rec[:, rnd_selection]
 
+    if strict:
+        output[first_spk_timestep + 1:, :] = 0
 
-    return num_to_select, rnd_selection, first_idx
+    return output
