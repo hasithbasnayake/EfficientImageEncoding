@@ -7,10 +7,12 @@ from preprocessing.spike_dataset import SpikeDataset
 from preprocessing.difference_of_guassians import lgn_preprocessing
 
 from model.model import Net
-from model.learning import update_weights, wta
+from learning.learning import update_weights
 
-import numpy as np
-import snntorch.spikeplot as splt
+from decoder.decoder import train_decoder
+
+from torch.utils.data import Subset
+
 import matplotlib.pyplot as plt
 import torch
 
@@ -39,19 +41,22 @@ if __name__ == '__main__':
     training_set = torchvision.datasets.FashionMNIST(root="assets/data/", train=True, transform=transforms.ToTensor(), download=True)
 
     training_images = training_set.data.unsqueeze(1)
-    training_labels = training_set.targets
-    training_images = lgn_preprocessing(training_images, shape, ctr, sur, threshold=1/255)
+    training_images = training_images.float() / 255
 
+    training_labels = training_set.targets
+
+    training_images = lgn_preprocessing(training_images, shape, ctr, sur, threshold=1/255)
     latency_images = latency(training_images)
+
     latency_images = latency_images.flatten(start_dim=1)
 
     spike_set = SpikeDataset(latency_images=latency_images, images=training_images, labels=training_labels, num_steps=255)
+    decoder_spike_set = Subset(spike_set, range(100))
+
     loader = DataLoader(spike_set, batch_size=1, shuffle=True)
+    decoder_loader = DataLoader(decoder_spike_set, batch_size=64, shuffle=True)
 
-    W0 = model.fc1.weight.detach().clone()
-
-    for i in range(60000):
-        print(f"Image: {i}")
+    for i in range(1):
         spikes, images, label = spike_set[i]
 
         with torch.no_grad():
@@ -62,6 +67,8 @@ if __name__ == '__main__':
         with torch.no_grad():
             model.fc1.weight += weight_update
             model.fc1.weight.clamp_(0, 1)
+
+    decoder = train_decoder(model, 255, decoder_loader)
 
         # fig, ax = plt.subplots(figsize=(10,5))
         # splt.raster(spk_rec, ax, s=5, color="black", marker="|")
@@ -81,15 +88,13 @@ if __name__ == '__main__':
         # plt.show()
         # plt.show()
 
-    W = model.fc1.weight.detach().cpu()
-    W = W - W0
-    W = W.reshape(100, 2, 28, 28)
-
-    rf = W[:, 0] - W[:, 1]
-
-    fig, axes = plt.subplots(10, 10, figsize=(10, 10))
-    for i, ax in enumerate(axes.flat):
-        ax.imshow(rf[i], cmap="bwr")
-        ax.axis("off")
-    plt.tight_layout()
-    plt.show()
+    # W = model.fc1.weight.detach().cpu().reshape(100, 2, 28, 28)
+    #
+    # rf = W[:, 0] - W[:, 1]
+    #
+    # fig, axes = plt.subplots(10, 10, figsize=(10, 10))
+    # for i, ax in enumerate(axes.flat):
+    #     ax.imshow(rf[i], cmap="bwr")
+    #     ax.axis("off")
+    # plt.tight_layout()
+    # plt.show()
