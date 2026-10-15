@@ -15,7 +15,7 @@ def latency(images: torch.Tensor, num_steps: int = 255) -> torch.Tensor:
     Returns
     ----------
     torch.Tensor
-        An Int tensor of the shape [N, C, H, W] with values in the range of [0, num_steps - 1].
+        A float tensor of the shape [N, C, H, W] with values in the range of [0, num_steps - 1].
         Zero-intensity pixels fire at the last step (num_steps - 1).
 
     """
@@ -37,6 +37,6 @@ def latency(images: torch.Tensor, num_steps: int = 255) -> torch.Tensor:
     norm_latency_images = (latency_images - min_val) / (max_val - min_val) * (num_steps - 1)
     norm_latency_images.masked_fill_(bool_mask_no_spike, num_steps - 1)
 
-    norm_latency_images = norm_latency_images.int()
+    norm_latency_images = norm_latency_images
 
     return norm_latency_images
