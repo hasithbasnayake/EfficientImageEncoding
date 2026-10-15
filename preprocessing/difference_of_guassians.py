@@ -1,7 +1,6 @@
 import torch
 
 def lgn_preprocessing(dataset, shape, ctr, sur, threshold=1e-6):
-    dataset = dataset.float() / 255
 
     on_kernel, off_kernel = [kernel.unsqueeze(0).unsqueeze(1) for kernel in gen_lgn_receptive_fields(shape, ctr, sur)]
 
