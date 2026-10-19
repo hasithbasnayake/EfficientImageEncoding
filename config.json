@@ -1,0 +1,6 @@
+{
+  "train_size": 10000,
+  "test_size": 10000,
+  "epoch": 100,
+  "WTA": true,
+}
