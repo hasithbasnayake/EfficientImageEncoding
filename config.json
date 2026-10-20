@@ -3,4 +3,6 @@
   "test_size": 10000,
   "epoch": 100,
   "WTA": true,
+  "A_plus": 0.87,
+  "A_minus": 0.21,
 }
