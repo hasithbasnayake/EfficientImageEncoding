@@ -2,7 +2,17 @@
   "train_size": 10000,
   "test_size": 10000,
   "epoch": 100,
-  "WTA": true,
-  "A_plus": 0.87,
-  "A_minus": 0.21,
+  "LGN_preprocessing": true,
+  "preprocessing_threshold": 1e-6,
+  "kernel_size": [6,6],
+  "num_steps": 255,
+  "WTA": false,
+  "WTA_parameters": [1, false],
+  "A_plus": 5e-3,
+  "A_minus": 3.75e-3,
+  "tau": 200,
+  "test": 200,
+  "mu_plus": 0.65,
+  "mu_minus": 0.05
 }
+
