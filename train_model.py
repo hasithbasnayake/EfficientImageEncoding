@@ -9,7 +9,9 @@ from xxlimited_35 import Null
 class Config:
     train_size: int
     test_size: int
-    epoch: int
+    seed: int
+    num_epochs: int
+    eval_every: int
     LGN_preprocessing: bool
     preprocessing_threshold: float
     kernel_size: list[int]
@@ -21,11 +23,17 @@ class Config:
     tau: float
     mu_plus: float
     mu_minus: float
-
+    #
+    # def __post_init__(self):
+    #     output = [isinstance(getattr(self, field.name), field.type) for field in dataclasses.fields(self)]
+    #     pass
 
 def train_model(config_json_path):
 
     hyperparameters = gen_config(config_json_path)
+
+    print(dataclasses.fields(hyperparameters))
+    print([field.name for field in dataclasses.fields(hyperparameters)])
 
     return hyperparameters
 
