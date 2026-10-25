@@ -1,11 +1,26 @@
 # Define train_model which instantiates the model and trains it given the set hyperparameters
 import json
 import dataclasses
-from dataclasses import dataclass
-from xxlimited_35 import Null
+from pydantic.dataclasses import dataclass
+from pydantic import ConfigDict
+from typing import NamedTuple
 
+class Kernel(NamedTuple):
+    x: int
+    y: int
 
-@dataclass
+class STDPParameters(NamedTuple):
+    A_plus: float
+    A_minus: float
+    tau: float
+    mu_plus: float
+    mu_minus: float
+
+class WTAParameters(NamedTuple):
+    num: int
+    performWTA: bool
+
+@dataclass(config=ConfigDict(strict=True))
 class Config:
     train_size: int
     test_size: int
@@ -14,26 +29,15 @@ class Config:
     eval_every: int
     LGN_preprocessing: bool
     preprocessing_threshold: float
-    kernel_size: list[int]
+    kernel: Kernel
     num_steps: int
     WTA: bool
-    WTA_parameters: list
-    A_plus: float
-    A_minus: float
-    tau: float
-    mu_plus: float
-    mu_minus: float
-    #
-    # def __post_init__(self):
-    #     output = [isinstance(getattr(self, field.name), field.type) for field in dataclasses.fields(self)]
-    #     pass
+    wta_parameters: WTAParameters
+    stdp_parameters: STDPParameters
 
 def train_model(config_json_path):
 
     hyperparameters = gen_config(config_json_path)
-
-    print(dataclasses.fields(hyperparameters))
-    print([field.name for field in dataclasses.fields(hyperparameters)])
 
     return hyperparameters
 
