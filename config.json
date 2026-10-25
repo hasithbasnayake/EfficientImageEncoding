@@ -6,14 +6,10 @@
   "eval_every": 10,
   "LGN_preprocessing": true,
   "preprocessing_threshold": 1e-6,
-  "kernel_size": [6,6],
+  "kernel": [6,6],
   "num_steps": 255,
   "WTA": false,
-  "WTA_parameters": [1, false],
-  "A_plus": 5e-3,
-  "A_minus": 3.75e-3,
-  "tau": 200,
-  "mu_plus": 0.65,
-  "mu_minus": 0.05
+  "wta_parameters": [1, false],
+  "stdp_parameters": [5e-3, 3.75e-3, 200, 0.65, 0.05]
 }
 
