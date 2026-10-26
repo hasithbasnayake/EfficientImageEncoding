@@ -21,6 +21,7 @@ if __name__ == '__main__':
     parser.add_argument("--name")
     parser.add_argument("--epochs", type=int)
     parser.add_argument("--epoch", type=int)
+    parser.add_argument("--force", action="store_true")
 
     args = parser.parse_args()
 
@@ -30,5 +31,15 @@ if __name__ == '__main__':
     if args.start is None and args.name is not None:
         parser.error("--name only applies to --start")
 
-    if args.eval is None and args.epochs is not None:
-        parser.error("--epochs only applies to --eval")
+    if args.eval is None and args.epoch is not None:
+        parser.error("--epoch only applies to --eval")
+
+    if args.extend is not None and args.epochs is None:
+        parser.error("--extend requires --epochs")
+
+    if args.force and args.eval is None:
+        parser.error("--force only applies to --eval")
+
+    print(args.start)
+
+    train_model(args.start)
